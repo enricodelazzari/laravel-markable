@@ -2,6 +2,15 @@
 
 All notable changes to `laravel-markable` will be documented in this file.
 
+## Unreleased
+
+### What's Changed
+
+- ADD `spatie/php-attribute-reader` dependency to simplify internal PHP attribute reading
+- ADD `#[WithMark]` and `#[WithMarks]` PHP attributes for registering marks on markable models as an alternative to the `$marks` property
+- ADD `#[MarkableRelation]` PHP attribute for declaring the markable relation name on `Mark` subclasses as an alternative to overriding the `markableRelationName()` method
+- UPDATE built-in mark models (`Like`, `Bookmark`, `Favorite`, `Reaction`) to use `#[MarkableRelation]` instead of implementing the method
+
 ## 2.3.2 - 2025-07-19
 
 #### What's Changed

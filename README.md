@@ -121,6 +121,54 @@ class Course extends Model
 }
 ```
 
+### PHP Attributes
+
+As an alternative to the `$marks` property, you can register marks using PHP 8 attributes directly on the model class.
+
+Use `#[WithMark]` (repeatable) to register marks one by one:
+
+``` php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Maize\Markable\Markable;
+use Maize\Markable\Attributes\WithMark;
+use Maize\Markable\Models\Bookmark;
+use Maize\Markable\Models\Like;
+
+#[WithMark(Like::class)]
+#[WithMark(Bookmark::class)]
+class Course extends Model
+{
+    use Markable;
+}
+```
+
+Or use `#[WithMarks]` to register multiple marks at once:
+
+``` php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Maize\Markable\Markable;
+use Maize\Markable\Attributes\WithMarks;
+use Maize\Markable\Models\Bookmark;
+use Maize\Markable\Models\Favorite;
+use Maize\Markable\Models\Like;
+
+#[WithMarks(Like::class, Favorite::class, Bookmark::class)]
+class Course extends Model
+{
+    use Markable;
+}
+```
+
+You can also combine the `$marks` property and attributes — duplicates are automatically removed.
+
 You can now assign likes to the model:
 
 ``` php
@@ -190,12 +238,25 @@ return new class extends Migration
 }
 ```
 
-Once done, you can create a new class which extends the abstract `Mark` class and implement the `markableRelationName` method, which is used to retrieve the users who marked a given model entity with the mark entity as pivot.
+Once done, you can create a new class which extends the abstract `Mark` class and declare the markable relation name using the `#[MarkableRelation]` attribute.
 
-You can also override the `markRelationName` method, which is used to retrieve the list of marks of a given model entity.
-By default, the relation name is the plural name of the mark class name.
+The markable relation name is used to retrieve the users who marked a given model entity with the mark entity as pivot.
 
 Here's an example model for the bookmarks mark:
+
+``` php
+<?php
+
+namespace App\Models;
+
+use Maize\Markable\Attributes\MarkableRelation;
+use Maize\Markable\Mark;
+
+#[MarkableRelation('bookmarkers')]
+class Bookmark extends Mark {}
+```
+
+As an alternative to the attribute, you can override the `markableRelationName` method:
 
 ``` php
 <?php
@@ -210,10 +271,24 @@ class Bookmark extends Mark
     {
         return 'bookmarkers';
     }
-    
+}
+```
+
+You can also override the `markRelationName` method, which is used to retrieve the list of marks of a given model entity.
+By default, the relation name is the plural name of the mark class name.
+
+``` php
+<?php
+
+namespace App\Models;
+
+use Maize\Markable\Mark;
+
+class Bookmark extends Mark
+{
     /**
-     * The override is useless in this case, as I am returning the default
-     * relation name which is the plural name of the mark class name (bookmarks, indeed)
+     * The override is useless in this case, as the default
+     * relation name is already the plural of the class name (bookmarks).
      */
     public static function markRelationName(): string
     {
