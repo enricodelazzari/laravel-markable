@@ -8,7 +8,7 @@ use Maize\Markable\Attributes\WithMark;
 use Maize\Markable\Attributes\WithMarks;
 use Maize\Markable\Exceptions\InvalidMarkInstanceException;
 use Maize\Markable\Scopes\MarkableScope;
-use ReflectionClass;
+use Spatie\Attributes\Attributes;
 
 trait Markable
 {
@@ -27,16 +27,14 @@ trait Markable
     {
         $fromProperty = static::$marks ?? [];
 
-        $reflection = new ReflectionClass(static::class);
-
         $fromWithMark = array_map(
-            fn ($attr) => $attr->newInstance()->markClass,
-            $reflection->getAttributes(WithMark::class)
+            fn (WithMark $attr) => $attr->markClass,
+            Attributes::getAll(static::class, WithMark::class)
         );
 
         $fromWithMarks = array_merge(...array_map(
-            fn ($attr) => $attr->newInstance()->markClasses,
-            $reflection->getAttributes(WithMarks::class)
+            fn (WithMarks $attr) => $attr->markClasses,
+            Attributes::getAll(static::class, WithMarks::class)
         ));
 
         return array_unique(array_merge($fromProperty, $fromWithMark, $fromWithMarks));
