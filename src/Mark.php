@@ -65,9 +65,11 @@ abstract class Mark extends MorphPivot
             ->__toString();
     }
 
-    public static function add(Model $markable, Model $user, ?string $value = null, array $metadata = []): self
+    public static function add(Model $markable, Model $user, \BackedEnum|string|null $value = null, array $metadata = []): self
     {
         static::validMarkable($markable);
+
+        $value = static::resolveValue($value);
 
         if (! static::hasAllowedValues($value)) {
             throw InvalidMarkValueException::create();
@@ -91,9 +93,11 @@ abstract class Mark extends MorphPivot
         return static::firstOrCreate($attributes, $values);
     }
 
-    public static function remove(Model $markable, Model $user, ?string $value = null)
+    public static function remove(Model $markable, Model $user, \BackedEnum|string|null $value = null)
     {
         static::validMarkable($markable);
+
+        $value = static::resolveValue($value);
 
         return static::where([
             app(static::class)->getUserIdColumn() => $user->getKey(),
@@ -103,9 +107,11 @@ abstract class Mark extends MorphPivot
         ])->get()->each->delete();
     }
 
-    public static function count(Model $markable, ?string $value = null): int
+    public static function count(Model $markable, \BackedEnum|string|null $value = null): int
     {
         static::validMarkable($markable);
+
+        $value = static::resolveValue($value);
 
         return static::where([
             'markable_id' => $markable->getKey(),
@@ -114,8 +120,10 @@ abstract class Mark extends MorphPivot
         ])->count();
     }
 
-    public static function has(Model $markable, Model $user, ?string $value = null): bool
+    public static function has(Model $markable, Model $user, \BackedEnum|string|null $value = null): bool
     {
+        $value = static::resolveValue($value);
+
         return static::where([
             app(static::class)->getUserIdColumn() => $user->getKey(),
             'markable_id' => $markable->getKey(),
@@ -124,11 +132,16 @@ abstract class Mark extends MorphPivot
         ])->exists();
     }
 
-    public static function toggle(Model $markable, Model $user, ?string $value = null, array $metadata = [])
+    public static function toggle(Model $markable, Model $user, \BackedEnum|string|null $value = null, array $metadata = [])
     {
         return static::has($markable, $user, $value)
             ? static::remove($markable, $user, $value)
             : static::add($markable, $user, $value, $metadata);
+    }
+
+    protected static function resolveValue(\BackedEnum|string|null $value): ?string
+    {
+        return $value instanceof \BackedEnum ? $value->value : $value;
     }
 
     public static function hasAllowedValues(?string $value): bool

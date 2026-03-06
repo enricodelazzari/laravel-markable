@@ -304,7 +304,9 @@ You can now include the custom mark to all models you wish and use it as explain
 
 You might need a custom mark with a subset of allowed values.
 
-You can declare them directly on the mark class using the `#[MarkAllowedValues]` attribute:
+You can declare them directly on the mark class using the `#[MarkAllowedValues]` attribute.
+
+Pass the values as strings:
 
 ``` php
 <?php
@@ -317,6 +319,30 @@ use Maize\Markable\Mark;
 
 #[MarkableRelation('reacters')]
 #[MarkAllowedValues('person_raising_hand', 'heart', 'kissing_heart')]
+class Reaction extends Mark {}
+```
+
+Or pass a backed enum class — all its cases are automatically used as allowed values:
+
+``` php
+<?php
+
+namespace App\Models;
+
+use App\Enums\ReactionType;
+use Maize\Markable\Attributes\MarkableRelation;
+use Maize\Markable\Attributes\MarkAllowedValues;
+use Maize\Markable\Mark;
+
+enum ReactionType: string
+{
+    case PersonRaisingHand = 'person_raising_hand';
+    case Heart             = 'heart';
+    case KissingHeart      = 'kissing_heart';
+}
+
+#[MarkableRelation('reacters')]
+#[MarkAllowedValues(ReactionType::class)]
 class Reaction extends Mark {}
 ```
 
@@ -334,24 +360,26 @@ Alternatively, you can define the allowed values in `config/markable.php`. The a
 
 When both are set, the `#[MarkAllowedValues]` attribute takes precedence over the config.
 
-You can then use the custom mark with values:
+You can then use the custom mark with values, passing either a string or a backed enum case:
 
 ``` php
+use App\Enums\ReactionType;
 use App\Models\Post;
-use Maize\Markable\Models\Reaction;
+use App\Models\Reaction;
 
 $post = Post::firstOrFail();
 $user = auth()->user();
 
-Reaction::add($post, $user, 'kissing_heart'); // adds the 'kissing_heart' reaction to the post for the given user
+Reaction::add($post, $user, ReactionType::KissingHeart); // adds the reaction using the enum case
+Reaction::add($post, $user, 'kissing_heart');             // equivalent, using the raw string value
 
-Reaction::remove($post, $user, 'kissing_heart'); // removes the 'kissing_heart' reaction to the post for the given user
+Reaction::remove($post, $user, ReactionType::KissingHeart);
 
-Reaction::toggle($post, $user, 'heart'); // toggles the 'heart' reaction to the post for the given user
+Reaction::toggle($post, $user, ReactionType::Heart);
 
-Reaction::has($post, $user, 'heart'); // returns whether the user has reacted with the 'heart' reaction to the given post or not
+Reaction::has($post, $user, ReactionType::Heart);
 
-Reaction::count($post, 'person_raising_hand'); // returns the amount of 'person_raising_hand' reactions for the given post
+Reaction::count($post, ReactionType::PersonRaisingHand);
 ```
 
 You can also use wildcards to allow any value for a specific mark, both via attribute and via config:

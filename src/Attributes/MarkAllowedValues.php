@@ -11,8 +11,20 @@ class MarkAllowedValues
 
     public function __construct(string ...$values)
     {
-        $this->values = count($values) === 1 && $values[0] === '*'
-            ? '*'
-            : $values;
+        if (count($values) === 1) {
+            if ($values[0] === '*') {
+                $this->values = '*';
+
+                return;
+            }
+
+            if (enum_exists($values[0])) {
+                $this->values = array_column($values[0]::cases(), 'value');
+
+                return;
+            }
+        }
+
+        $this->values = $values;
     }
 }

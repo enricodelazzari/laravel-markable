@@ -9,6 +9,9 @@ use Maize\Markable\Models\Bookmark;
 use Maize\Markable\Models\Favorite;
 use Maize\Markable\Models\Like;
 use Maize\Markable\Models\Reaction;
+use Maize\Markable\Tests\Models\AttributeReaction;
+use Maize\Markable\Tests\Models\EnumReaction;
+use Maize\Markable\Tests\Models\WildcardReaction;
 
 class Article extends Model
 {
@@ -22,5 +25,6 @@ class Article extends Model
         Reaction::class,
         AttributeReaction::class,
         WildcardReaction::class,
+        EnumReaction::class,
     ];
 }
