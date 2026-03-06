@@ -10,6 +10,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Maize\Markable\Attributes\MarkableRelation;
+use Maize\Markable\Attributes\MarkAllowedValues;
 use Maize\Markable\Exceptions\InvalidMarkableInstanceException;
 use Maize\Markable\Exceptions\InvalidMarkValueException;
 use Spatie\Attributes\Attributes;
@@ -47,6 +48,12 @@ abstract class Mark extends MorphPivot
 
     public static function allowedValues(): array|string|null
     {
+        $attribute = Attributes::get(static::class, MarkAllowedValues::class);
+
+        if ($attribute !== null) {
+            return $attribute->values;
+        }
+
         $className = Str::lower(static::getMarkClassName());
 
         return config("markable.allowed_values.{$className}");

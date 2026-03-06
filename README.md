@@ -304,11 +304,23 @@ You can now include the custom mark to all models you wish and use it as explain
 
 You might need a custom mark with a subset of allowed values.
 
-In this case, you can just define your custom mark as explained before and add the list of allowed values in `allowed_values` array under `config/markable.php`.
+You can declare them directly on the mark class using the `#[MarkAllowedValues]` attribute:
 
-The array key name should match the mark's class name in lower case.
+``` php
+<?php
 
-Here's an example when working with reactions:
+namespace App\Models;
+
+use Maize\Markable\Attributes\MarkableRelation;
+use Maize\Markable\Attributes\MarkAllowedValues;
+use Maize\Markable\Mark;
+
+#[MarkableRelation('reacters')]
+#[MarkAllowedValues('person_raising_hand', 'heart', 'kissing_heart')]
+class Reaction extends Mark {}
+```
+
+Alternatively, you can define the allowed values in `config/markable.php`. The array key name should match the mark's class name in lower case.
 
 ``` php
 'allowed_values' => [
@@ -319,6 +331,8 @@ Here's an example when working with reactions:
     ],
 ],
 ```
+
+When both are set, the `#[MarkAllowedValues]` attribute takes precedence over the config.
 
 You can then use the custom mark with values:
 
@@ -340,9 +354,12 @@ Reaction::has($post, $user, 'heart'); // returns whether the user has reacted wi
 Reaction::count($post, 'person_raising_hand'); // returns the amount of 'person_raising_hand' reactions for the given post
 ```
 
-You can also use wildcards to allow any value for a specific mark.
+You can also use wildcards to allow any value for a specific mark, both via attribute and via config:
 
-Here's an example when working with reactions:
+``` php
+#[MarkAllowedValues('*')]
+class Reaction extends Mark {}
+```
 
 ``` php
 'allowed_values' => [
