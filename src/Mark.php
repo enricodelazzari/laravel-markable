@@ -9,8 +9,10 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Maize\Markable\Attributes\MarkableRelation;
 use Maize\Markable\Exceptions\InvalidMarkableInstanceException;
 use Maize\Markable\Exceptions\InvalidMarkValueException;
+use Spatie\Attributes\Attributes;
 
 abstract class Mark extends MorphPivot
 {
@@ -20,7 +22,21 @@ abstract class Mark extends MorphPivot
         'metadata' => 'array',
     ];
 
-    abstract public static function markableRelationName(): string;
+    public static function markableRelationName(): string
+    {
+        $attribute = Attributes::get(static::class, MarkableRelation::class);
+
+        if ($attribute !== null) {
+            return $attribute->name;
+        }
+
+        throw new \RuntimeException(
+            sprintf(
+                'Mark class [%s] must define a relation name via the #[MarkableRelation] attribute or by overriding the markableRelationName() method.',
+                static::class
+            )
+        );
+    }
 
     public static function markRelationName(): string
     {

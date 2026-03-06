@@ -2,12 +2,8 @@
 
 namespace Maize\Markable\Models;
 
+use Maize\Markable\Attributes\MarkableRelation;
 use Maize\Markable\Mark;
 
-class Bookmark extends Mark
-{
-    public static function markableRelationName(): string
-    {
-        return 'bookmarkers';
-    }
-}
+#[MarkableRelation('bookmarkers')]
+class Bookmark extends Mark {}
