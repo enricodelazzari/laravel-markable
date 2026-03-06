@@ -4,8 +4,11 @@ namespace Maize\Markable;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Maize\Markable\Attributes\WithMark;
+use Maize\Markable\Attributes\WithMarks;
 use Maize\Markable\Exceptions\InvalidMarkInstanceException;
 use Maize\Markable\Scopes\MarkableScope;
+use ReflectionClass;
 
 trait Markable
 {
@@ -22,7 +25,21 @@ trait Markable
 
     public static function marks(): array
     {
-        return static::$marks ?? [];
+        $fromProperty = static::$marks ?? [];
+
+        $reflection = new ReflectionClass(static::class);
+
+        $fromWithMark = array_map(
+            fn ($attr) => $attr->newInstance()->markClass,
+            $reflection->getAttributes(WithMark::class)
+        );
+
+        $fromWithMarks = array_merge(...array_map(
+            fn ($attr) => $attr->newInstance()->markClasses,
+            $reflection->getAttributes(WithMarks::class)
+        ));
+
+        return array_unique(array_merge($fromProperty, $fromWithMark, $fromWithMarks));
     }
 
     public function scopeWhereHasMark(Builder $builder, Mark $mark, Model $user, ?string $value = null): Builder
